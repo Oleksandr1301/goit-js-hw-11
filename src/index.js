@@ -15,6 +15,8 @@ const loadMoreEl = document.querySelector('.load-more');
 let lightbox = new SimpleLightbox('.img a');
 let pageNumber = 1;
 
+loadMoreEl.style.display = 'none';
+
 searchForm.addEventListener('submit', onSubmitSearchForm);
 
 async function onSubmitSearchForm(e) {
