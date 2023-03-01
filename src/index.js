@@ -17,7 +17,7 @@ let pageNumber = 1;
 
 searchForm.addEventListener('submit', onSubmitSearchForm);
 
-async function onSubmitSearchForm(e) {
+function onSubmitSearchForm(e) {
   e.preventDefault();
   cleanGallery();
   let inputValue = searchInput.value.trim();
