@@ -15,8 +15,6 @@ const loadMoreEl = document.querySelector('.load-more');
 let lightbox = new SimpleLightbox('.img a');
 let pageNumber = 1;
 
-loadMoreEl.style.display = 'none';
-
 searchForm.addEventListener('submit', onSubmitSearchForm);
 
 async function onSubmitSearchForm(e) {
@@ -29,23 +27,24 @@ async function onSubmitSearchForm(e) {
         Notiflix.Notify.failure(
           'Sorry, there are no images matching your search query. Please try again.'
         );
+        loadMoreEl.classList.add('visually-hidden');
         return;
-      } else {
+      } else if (foundDate.hits.length >= 40) {
         renderImadesList(foundDate.hits);
 
         Notiflix.Notify.success(
           `Hooray! We found ${foundDate.totalHits} images.`
         );
         lightbox.refresh();
-
-        const { height: cardHeight } = document
-          .querySelector('.gallery')
-          .firstElementChild.getBoundingClientRect();
-
-        window.scrollBy({
-          top: cardHeight * -100,
-          behavior: 'smooth',
-        });
+        loadMoreEl.classList.remove('visually-hidden');
+      } else if (foundDate.hits.length < 40) {
+        renderImadesList(foundDate.hits);
+        Notiflix.Notify.info(
+          `We're sorry, but you've reached the end of search ${foundDate.totalHits} images.`
+        );
+        loadMoreEl.classList.add('visually-hidden');
+        lightbox.refresh();
+        return;
       }
     });
     // console.log(fetchImg());
@@ -59,7 +58,20 @@ function onClickLoadMoreBtn() {
   let inputValue = searchInput.value.trim();
   fetchImg(inputValue, pageNumber).then(foundDate => {
     renderImadesList(foundDate.hits);
+    //  Notiflix.Notify.success(
+    //           `Hooray! We found ${foundDate.totalHits} images.`
+    //         );
+
     lightbox.refresh();
+
+    if (foundDate.hits.length < 40) {
+      Notiflix.Notify.info(
+        "We're sorry, but you've reached the end of search results."
+      );
+      loadMoreEl.classList.add('visually-hidden');
+      lightbox.refresh();
+    }
+
     const { height: cardHeight } = document
       .querySelector('.gallery')
       .firstElementChild.getBoundingClientRect();
@@ -80,7 +92,8 @@ function renderImadesList(images) {
   const markup = images
     .map(img => {
       return ` <div class="img">
-  <a href="${img.largeImageURL}" class='gallery__item'><img class="gallery__image" src="${img.webformatURL}" alt="${img.tags}" title="${img.tags}" loading="lazy" /></a> 
+  <a href="${img.largeImageURL}" class='gallery__item'>
+  <img class="gallery__image" src="${img.webformatURL}" alt="${img.tags}" title="${img.tags}" loading="lazy" /></a> 
   <div class="info">
            <p class="info-item">
     <b>Likes</b> <span class="info-item-api"> ${img.likes} </span>
@@ -99,8 +112,3 @@ function renderImadesList(images) {
     .join('');
   galleryEl.insertAdjacentHTML('beforeend', markup);
 }
-
-// let lightbox = new SimpleLightbox('.gallery a', {
-//   captionDelay: 250,
-//   captionsData: 'alt',
-// });
